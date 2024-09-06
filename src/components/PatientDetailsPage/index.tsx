@@ -17,6 +17,7 @@ const PatientDetailsPage = () => {
       if (id) {
         const patient = await patientService.getById(id);
         setPatient(patient);
+        console.log(patient);
       } else {
         console.error('Patient not found');
       }
@@ -36,14 +37,33 @@ const PatientDetailsPage = () => {
   };
 
   return (
-    <div>
-      <h2>
-        {patient?.name} {genderIcon(patient?.gender)}
-      </h2>
-      <span>ssn: {patient?.ssn}</span>
-      <br />
-      <span>occupation: {patient?.occupation}</span>
-    </div>
+    <section>
+      <div>
+        <h2>
+          {patient?.name} {genderIcon(patient?.gender)}
+        </h2>
+        <span>ssn: {patient?.ssn}</span>
+        <br />
+        <span>occupation: {patient?.occupation}</span>
+      </div>
+
+      <div>
+        <h2>entries</h2>
+
+        {patient?.entries.map((entry) => (
+          <div key={entry.id}>
+            <p>
+              {entry.date} {entry.description}
+            </p>
+            <ul>
+              {entry.diagnosisCodes?.map((code) => (
+                <li key={code}>{code}</li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </section>
   );
 };
 
