@@ -14,10 +14,13 @@ import {
   Diagnosis,
   Entry,
   HealthCheckRating,
+  EntryWithoutId,
 } from '../../types';
 
 import patientService from '../../services/patients';
 import diagnosesService from '../../services/diagnoses';
+import AddEntry from '../AddEntry';
+import axios from 'axios';
 
 const HealthIcon = (health: HealthCheckRating) => {
   switch (health) {
@@ -105,6 +108,35 @@ const PatientDetailsPage = () => {
     void fetchDiagnoses();
   }, [id]);
 
+  const submitNewEntry = async (values: EntryWithoutId) => {
+    try {
+      if (patient) {
+        const entry = await patientService.addEntry(patient.id, values);
+
+        const newPatient = {
+          ...patient,
+          entries: patient.entries.concat(entry),
+        };
+
+        setPatient(newPatient);
+      }
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.data && error.response.data === 'string') {
+          const message = error.response.data.replace(
+            'Something went wrong. Error: ',
+            ''
+          );
+          console.error(message);
+        } else {
+          console.error('An error occurred while adding the entry.');
+        }
+      } else {
+        console.error('Unknown Error', error);
+      }
+    }
+  };
+
   const genderIcon = (gender: Gender | undefined) => {
     if (gender === 'female') {
       return <FemaleIcon />;
@@ -131,6 +163,10 @@ const PatientDetailsPage = () => {
         <br />
 
         <span>occupation: {patient?.occupation}</span>
+      </div>
+
+      <div>
+        <AddEntry onSubmit={submitNewEntry} />
       </div>
 
       <div>
