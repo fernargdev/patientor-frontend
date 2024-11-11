@@ -7,7 +7,7 @@ export enum Gender {
   Other = 'other',
 }
 
-export interface Diagnosis {
+export interface Diagnose {
   code: string;
   name: string;
   latin?: string;
@@ -23,12 +23,14 @@ export interface Patient {
   entries: Entry[];
 }
 
+export type PatientFormValues = Omit<Patient, 'id' | 'entries'>;
+
 export interface BaseEntry {
   id: string;
   description: string;
   date: string;
   specialist: string;
-  diagnosisCodes?: Array<Diagnosis['code']>;
+  diagnosisCodes?: Array<Diagnose['code']>;
 }
 
 export interface Discharge {
@@ -71,10 +73,10 @@ export type Entry =
 
 export type NoSsnPatient = Omit<Patient, 'ssn'>;
 
-// export type NewPatientEntry = z.infer<typeof NewPatientSchema>;
-export type NewPatientEntry = Omit<Patient, 'id'>;
+// export type NewPatient = z.infer<typeof NewPatientSchema>;
+export type NewPatient = Omit<Patient, 'id'>;
 
-export type NonSensitivePatient = Omit<Patient, 'ssn' | 'entries'>;
+// export type NonSensitivePatient = Omit<Patient, 'ssn' | 'entries'>;
 
 // Define special omit for unions
 type UnionOmit<T, K extends string | number | symbol> = T extends unknown

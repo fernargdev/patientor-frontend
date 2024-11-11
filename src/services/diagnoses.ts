@@ -1,13 +1,13 @@
 import axios from 'axios';
-import { Diagnosis } from '../types';
+import { Diagnose } from '../types';
 
 import { apiBaseUrl } from '../constants';
 
-const getAllDiagnoses = async () => {
-  const { data } = await axios.get<Diagnosis[]>(`${apiBaseUrl}/diagnoses`);
+const getAll = async () => {
+  const { data } = await axios.get<Diagnose[]>(`${apiBaseUrl}/diagnoses`);
   return data;
 };
 
 export default {
-  getAllDiagnoses,
+  getAll,
 };

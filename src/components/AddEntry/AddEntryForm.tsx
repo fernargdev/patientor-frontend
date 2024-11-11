@@ -1,26 +1,28 @@
 import { useState, SyntheticEvent } from 'react';
-import { TextField, Grid, Button, InputLabel } from '@mui/material';
-import { Diagnosis, EntryWithoutId, HealthCheckRating } from '../../types';
+import { TextField, Grid, Button } from '@mui/material';
+import { Diagnose, EntryWithoutId, HealthCheckRating } from '../../types';
 
 interface Props {
+  onCancel: () => void;
   onSubmit: (values: EntryWithoutId) => void;
 }
 
-const AddEntryForm = ({ onSubmit }: Props) => {
+const AddEntryForm = ({ onCancel, onSubmit }: Props) => {
   const [description, setDescription] = useState('');
   const [date, setDate] = useState('');
   const [specialist, setSpecialist] = useState('');
 
-  const [diagnosisCodes, setDiagnosisCodes] = useState<
-    Array<Diagnosis['code']>
-  >([]);
+  const [diagnosisCodes, setdiagnosisCodes] = useState<Array<Diagnose['code']>>(
+    []
+  );
 
   const [healthCheckRating, setHealthCheckRating] = useState(
     HealthCheckRating.Healthy
   );
 
+  // const addEntry = () => {
   const addEntry = (event: SyntheticEvent) => {
-    event.preventDefault;
+    event.preventDefault();
 
     const baseEntry = {
       description,
@@ -39,7 +41,6 @@ const AddEntryForm = ({ onSubmit }: Props) => {
   return (
     <div>
       <form onSubmit={addEntry}>
-        <InputLabel style={{ marginTop: 20 }}>Description</InputLabel>
         <TextField
           label="Description"
           fullWidth
@@ -47,7 +48,6 @@ const AddEntryForm = ({ onSubmit }: Props) => {
           onChange={({ target }) => setDescription(target.value)}
         />
 
-        <InputLabel style={{ marginTop: 20 }}>Date</InputLabel>
         <TextField
           label="Date"
           fullWidth
@@ -55,7 +55,6 @@ const AddEntryForm = ({ onSubmit }: Props) => {
           onChange={({ target }) => setDate(target.value)}
         />
 
-        <InputLabel style={{ marginTop: 20 }}>Specialist</InputLabel>
         <TextField
           label="Specialist"
           fullWidth
@@ -63,7 +62,6 @@ const AddEntryForm = ({ onSubmit }: Props) => {
           onChange={({ target }) => setSpecialist(target.value)}
         />
 
-        <InputLabel style={{ marginTop: 20 }}>Healthcheck Rating</InputLabel>
         <TextField
           label="Healthcheck Rating"
           fullWidth
@@ -81,15 +79,14 @@ const AddEntryForm = ({ onSubmit }: Props) => {
           }}
         />
 
-        <InputLabel style={{ margin: 20 }}>Diagnosis codes</InputLabel>
         <TextField
-          label="Diagnosis codes"
+          label="Diagnose codes"
           fullWidth
           value={diagnosisCodes}
           onChange={({ target }) => {
             const diagnosisCodesArray = target.value.split(', ');
             console.log(diagnosisCodesArray);
-            setDiagnosisCodes(diagnosisCodesArray);
+            setdiagnosisCodes(diagnosisCodesArray);
           }}
         />
 
@@ -100,6 +97,7 @@ const AddEntryForm = ({ onSubmit }: Props) => {
               variant="contained"
               style={{ float: 'left' }}
               type="button"
+              onClick={onCancel}
             >
               Cancel
             </Button>
