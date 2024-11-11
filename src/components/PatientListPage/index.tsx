@@ -12,8 +12,8 @@ import {
 } from '@mui/material';
 import axios from 'axios';
 
-// import { PatientFormValues, Patient } from '../../types';
-import { NonSensitivePatient, Patient } from '../../types';
+import { PatientFormValues, Patient } from '../../types';
+
 import AddPatientModal from '../AddPatientModal';
 
 import HealthRatingBar from '../HealthRatingBar';
@@ -36,11 +36,14 @@ const PatientListPage = ({ patients, setPatients }: Props) => {
     setError(undefined);
   };
 
-  const submitNewPatient = async (values: NonSensitivePatient) => {
+  const submitNewPatient = async (values: PatientFormValues) => {
     try {
       const patient = await patientService.create(values);
+      console.log(patient);
+
       setPatients(patients.concat(patient));
-      setModalOpen(false);
+
+      closeModal();
     } catch (e: unknown) {
       if (axios.isAxiosError(e)) {
         if (e?.response?.data && typeof e?.response?.data === 'string') {
@@ -51,6 +54,7 @@ const PatientListPage = ({ patients, setPatients }: Props) => {
           console.error(message);
           setError(message);
         } else {
+          console.error(e);
           setError('Unrecognized axios error');
         }
       } else {

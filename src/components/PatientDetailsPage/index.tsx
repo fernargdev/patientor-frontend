@@ -1,7 +1,6 @@
-import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useState } from 'react';
 
-import { Box } from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
 import FemaleIcon from '@mui/icons-material/Female';
 import MaleIcon from '@mui/icons-material/Male';
 import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
@@ -11,16 +10,25 @@ import FavoriteIcon from '@mui/icons-material/Favorite';
 import {
   Gender,
   Patient,
-  Diagnosis,
+  Diagnose,
   Entry,
   HealthCheckRating,
   EntryWithoutId,
 } from '../../types';
 
 import patientService from '../../services/patients';
-import diagnosesService from '../../services/diagnoses';
-import AddEntry from '../AddEntry';
 import axios from 'axios';
+import AddEntryModal from '../AddEntry';
+
+const genderIcon = (gender: Gender | undefined) => {
+  if (gender === 'female') {
+    return <FemaleIcon />;
+  } else if (gender === 'male') {
+    return <MaleIcon />;
+  } else {
+    return null;
+  }
+};
 
 const HealthIcon = (health: HealthCheckRating) => {
   switch (health) {
@@ -82,124 +90,143 @@ const EntryDetails = ({ entry }: { entry: Entry }) => {
   }
 };
 
-const PatientDetailsPage = () => {
-  const id = useParams().id;
+interface Props {
+  patients: Patient[];
+  setPatients: React.Dispatch<React.SetStateAction<Patient[]>>;
+  patient: Patient | null | undefined;
+  diagnoses: Diagnose[];
+}
 
-  const [patient, setPatient] = useState<Patient | null | undefined>(null);
-  const [diagnoses, setDiagnoses] = useState<Diagnosis[]>([]);
+const PatientDetailsPage = ({
+  patients,
+  setPatients,
+  patient,
+  diagnoses,
+}: Props) => {
+  const [modalOpen, setModalOpen] = useState<boolean>(false);
+  const [error, setError] = useState<string>();
 
-  useEffect(() => {
-    const fetchPatient = async () => {
-      if (id) {
-        const patient = await patientService.getById(id);
-        setPatient(patient);
-        console.log(patient);
-      } else {
-        console.error('Patient not found');
-      }
-    };
+  const openModal = (): void => setModalOpen(true);
 
-    const fetchDiagnoses = async () => {
-      const diagnoses = await diagnosesService.getAllDiagnoses();
-      setDiagnoses(diagnoses);
-    };
-
-    void fetchPatient();
-    void fetchDiagnoses();
-  }, [id]);
+  const closeModal = (): void => {
+    setModalOpen(false);
+    setError(undefined);
+  };
 
   const submitNewEntry = async (values: EntryWithoutId) => {
     try {
       if (patient) {
-        const entry = await patientService.addEntry(patient.id, values);
+        const newEntry = await patientService.addEntry(patient.id, values);
 
         const newPatient = {
           ...patient,
-          entries: patient.entries.concat(entry),
+          entries: patient.entries.concat(newEntry),
         };
 
-        setPatient(newPatient);
+        setPatients(
+          patients.map((p) => (p.id === newPatient.id ? newPatient : p))
+        );
+
+        closeModal();
       }
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
-        if (error.response?.data && error.response.data === 'string') {
+        if (
+          error?.response?.data &&
+          typeof error?.response?.data === 'string'
+        ) {
           const message = error.response.data.replace(
             'Something went wrong. Error: ',
             ''
           );
+
           console.error(message);
+          setError(message);
         } else {
-          console.error('An error occurred while adding the entry.');
+          console.log('Unrecognized axios error: ', error);
+          setError('Unrecognized axios error');
         }
       } else {
-        console.error('Unknown Error', error);
+        console.error('Unknown Error: ', error);
+        setError('Unknown Error');
       }
     }
   };
 
-  const genderIcon = (gender: Gender | undefined) => {
-    if (gender === 'female') {
-      return <FemaleIcon />;
-    } else if (gender === 'male') {
-      return <MaleIcon />;
-    } else {
-      return null;
-    }
-  };
-
-  const getDiagnosisName = (code: string) => {
-    const diagnosis = diagnoses.find((diagnosis) => diagnosis.code === code);
-    return diagnosis ? diagnosis.name : null;
-  };
-
   return (
-    <section>
-      <div>
-        <h2>
-          {patient?.name} {genderIcon(patient?.gender)}
-        </h2>
+    <div>
+      <Typography component="h5" variant="h5">
+        {patient?.name} {genderIcon(patient?.gender)}
+      </Typography>
 
-        <span>ssn: {patient?.ssn}</span>
-        <br />
+      <p>ssn: {patient?.ssn}</p>
+      <p>occupation: {patient?.occupation}</p>
 
-        <span>occupation: {patient?.occupation}</span>
-      </div>
+      <AddEntryModal
+        onSubmit={submitNewEntry}
+        error={error}
+        onClose={closeModal}
+        modalOpen={modalOpen}
+      />
+      <Button variant="contained" onClick={() => openModal()}>
+        Add New Entry
+      </Button>
 
-      <div>
-        <AddEntry onSubmit={submitNewEntry} />
-      </div>
+      <Typography component="h6" variant="h6">
+        Entries
+      </Typography>
 
-      <div>
-        <h2>entries</h2>
+      {patient?.entries.map((e) => {
+        return (
+          <div key={e.id}>
+            <Box
+              sx={{
+                border: '1px solid grey',
+                borderRadius: 4,
+                padding: 2,
+                margin: 1,
+              }}
+            >
+              <p>{e.date}</p>
 
-        {patient?.entries.map((entry) => {
-          return (
-            <div key={entry.id}>
-              <Box
-                sx={{
-                  border: '1px solid black',
-                  borderRadius: '5px',
-                  padding: '5px',
-                  margin: '5px',
-                }}
-              >
-                <EntryDetails entry={entry} />
+              {e.type === 'OccupationalHealthcare' ? (
+                e.employerName ? (
+                  <p>
+                    <WorkIcon /> {e.employerName}
+                  </p>
+                ) : (
+                  <WorkIcon />
+                )
+              ) : (
+                <MedicalServicesIcon />
+              )}
 
-                <ul>
-                  {entry.diagnosisCodes?.map((code) => (
-                    <li key={code}>
-                      {code} {getDiagnosisName(code)}
+              <p>
+                <i>{e.description}</i>
+              </p>
+
+              <ul>
+                {e.diagnosisCodes?.map((d) => {
+                  const Diagnose = diagnoses.find(
+                    (diagnose) => diagnose.code === d
+                  )?.name;
+
+                  return (
+                    <li key={d}>
+                      {d} {Diagnose ? Diagnose : null}
                     </li>
-                  ))}
-                </ul>
+                  );
+                })}
+              </ul>
 
-                <p>diagnose by {entry.specialist}</p>
-              </Box>
-            </div>
-          );
-        })}
-      </div>
-    </section>
+              <EntryDetails entry={e} />
+
+              <p>diagnose by {e.specialist}</p>
+            </Box>
+          </div>
+        );
+      })}
+    </div>
   );
 };
 
