@@ -7,7 +7,6 @@ import { apiBaseUrl } from './constants';
 import { Diagnose, Patient } from './types';
 
 import patientService from './services/patients';
-import diagnoseService from './services/diagnoses';
 
 import PatientListPage from './components/PatientListPage';
 import PatientDetailsPage from './components/PatientDetailsPage';
@@ -26,10 +25,11 @@ const App = () => {
     void fetchPatientList();
 
     const fetchDiagnoseList = async () => {
-      const allDiagnoses = await diagnoseService.getAll();
-      setDiagnoses(allDiagnoses);
+      const { data } = await axios.get<Diagnose[]>(`${apiBaseUrl}/diagnoses`);
+
+      setDiagnoses(data);
     };
-    void fetchDiagnoseList;
+    void fetchDiagnoseList();
   }, []);
 
   const match = useMatch('/patients/:id');

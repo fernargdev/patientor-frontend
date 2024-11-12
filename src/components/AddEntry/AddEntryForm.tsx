@@ -3,18 +3,18 @@ import {
   TextField,
   Grid,
   Button,
-  // Typography,
-  // InputLabel,
   Select,
   MenuItem,
   SelectChangeEvent,
   InputLabel,
+  OutlinedInput,
 } from '@mui/material';
 import { Diagnose, EntryWithoutId, HealthCheckRating } from '../../types';
 
 interface Props {
   onCancel: () => void;
   onSubmit: (values: EntryWithoutId) => void;
+  diagnoses: Diagnose[];
 }
 
 interface HealthCheckRatingOption {
@@ -27,14 +27,11 @@ const healthCheckRatingOptions: HealthCheckRatingOption[] = Object.values(
 )
   .filter((value) => typeof value === 'number')
   .map((v) => ({
-    // value: v as number,
-    // label: HealthCheckRating[v as keyof typeof HealthCheckRating],
-
     value: v as number,
     label: HealthCheckRating[v as number],
   }));
 
-const AddEntryForm = ({ onCancel, onSubmit }: Props) => {
+const AddEntryForm = ({ onCancel, onSubmit, diagnoses }: Props) => {
   const [description, setDescription] = useState('');
   const [date, setDate] = useState('');
   const [specialist, setSpecialist] = useState('');
@@ -71,6 +68,17 @@ const AddEntryForm = ({ onCancel, onSubmit }: Props) => {
 
       console.log(value);
     }
+  };
+
+  const onDiagnosisCodesChange = (event: SelectChangeEvent<string[]>) => {
+    event.preventDefault();
+
+    const value = event.target.value;
+    console.log(value);
+
+    typeof value === 'string'
+      ? setdiagnosisCodes(value.split(', '))
+      : setdiagnosisCodes(value);
   };
 
   // const addEntry = () => {
@@ -138,37 +146,23 @@ const AddEntryForm = ({ onCancel, onSubmit }: Props) => {
         />
 
         <InputLabel style={{ padding: 10 }}>Diagnose codes :</InputLabel>
-        <TextField
+        <Select
           label="Diagnose codes"
           fullWidth
+          multiple
           value={diagnosisCodes}
-          onChange={({ target }) => {
-            const diagnosisCodesArray = target.value.split(', ');
-            console.log(diagnosisCodesArray);
-            setdiagnosisCodes(diagnosisCodesArray);
-          }}
-        />
-
-        {/* <TextField
-          label="Healthcheck Rating"
-          fullWidth
-          value={healthCheckRating}
-          onChange={({ target }) => {
-            const healthCheckRatingValue = Number(target.value);
-            if (
-              healthCheckRatingValue === 0 ||
-              healthCheckRatingValue === 1 ||
-              healthCheckRatingValue === 2 ||
-              healthCheckRatingValue === 3
-            ) {
-              setHealthCheckRating(healthCheckRatingValue);
-            }
-          }}
-        /> */}
+          onChange={onDiagnosisCodesChange}
+          input={<OutlinedInput label="Multiple Select" />}
+        >
+          {diagnoses.map((d) => (
+            <MenuItem key={d.code} value={d.code}>
+              {d.code}
+            </MenuItem>
+          ))}
+        </Select>
 
         {entryOptions === 'HealthCheck' && (
           <>
-            {/* <InputLabel>Healthcheck Rating:</InputLabel> */}
             <InputLabel style={{ padding: 10 }}>
               Healthcheck Rating :
             </InputLabel>

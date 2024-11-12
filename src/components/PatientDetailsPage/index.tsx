@@ -106,6 +106,8 @@ const PatientDetailsPage = ({
   const [modalOpen, setModalOpen] = useState<boolean>(false);
   const [error, setError] = useState<string>();
 
+  console.log(diagnoses);
+
   const openModal = (): void => setModalOpen(true);
 
   const closeModal = (): void => {
@@ -167,6 +169,7 @@ const PatientDetailsPage = ({
         error={error}
         onClose={closeModal}
         modalOpen={modalOpen}
+        diagnoses={diagnoses}
       />
       <Button variant="contained" onClick={() => openModal()}>
         Add New Entry
