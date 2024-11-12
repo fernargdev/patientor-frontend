@@ -1,26 +1,15 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import {
-  // BrowserRouter as Router,
-  Route,
-  Link,
-  Routes,
-  useMatch,
-} from 'react-router-dom';
+import { Route, Link, Routes, useMatch } from 'react-router-dom';
 import { Button, Divider, Container, Typography } from '@mui/material';
 
 import { apiBaseUrl } from './constants';
 import { Diagnose, Patient } from './types';
 
 import patientService from './services/patients';
-import diagnoseService from './services/diagnoses';
 
 import PatientListPage from './components/PatientListPage';
 import PatientDetailsPage from './components/PatientDetailsPage';
-// import Diagnoses from './services/diagnoses';
-// import { Details } from '@mui/icons-material';
-
-// import DiagnosesContext from './context/dianosesContext';
 
 const App = () => {
   const [patients, setPatients] = useState<Patient[]>([]);
@@ -36,10 +25,11 @@ const App = () => {
     void fetchPatientList();
 
     const fetchDiagnoseList = async () => {
-      const allDiagnoses = await diagnoseService.getAll();
-      setDiagnoses(allDiagnoses);
+      const { data } = await axios.get<Diagnose[]>(`${apiBaseUrl}/diagnoses`);
+
+      setDiagnoses(data);
     };
-    void fetchDiagnoseList;
+    void fetchDiagnoseList();
   }, []);
 
   const match = useMatch('/patients/:id');
@@ -59,7 +49,6 @@ const App = () => {
 
         <Divider hidden />
 
-        {/* <DiagnosesContext.Provider value={diagnoses}> */}
         <Routes>
           <Route
             path="/"
@@ -80,40 +69,9 @@ const App = () => {
             }
           />
         </Routes>
-        {/* </DiagnosesContext.Provider> */}
       </Container>
     </div>
   );
-
-  // return (
-  //   <div className="App">
-  //     <Router>
-  //       <Container>
-  //         <Typography variant="h3" style={{ marginBottom: '0.5em' }}>
-  //           Patientor
-  //         </Typography>
-  //         <Button component={Link} to="/" variant="contained" color="primary">
-  //           Home
-  //         </Button>
-  //         <Divider hidden />
-
-  //         <Routes>
-  //           <Route
-  //             path="/"
-  //             element={
-  //               <PatientListPage
-  //                 patients={patients}
-  //                 setPatients={setPatients}
-  //               />
-  //             }
-  //           />
-
-  //           <Route path="/patients/:id" element={<PatientDetailsPage />} />
-  //         </Routes>
-  //       </Container>
-  //     </Router>
-  //   </div>
-  // );
 };
 
 export default App;

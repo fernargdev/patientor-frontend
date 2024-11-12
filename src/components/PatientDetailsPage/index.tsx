@@ -20,8 +20,6 @@ import {
 } from '../../types';
 
 import patientService from '../../services/patients';
-// import diagnosesService from '../../services/diagnoses';
-// import AddEntry from '../AddEntry';
 import axios from 'axios';
 import AddEntryModal from '../AddEntry';
 
@@ -95,11 +93,6 @@ const EntryDetails = ({ entry }: { entry: Entry }) => {
   }
 };
 
-// const getDiagnoseName = (code: string) => {
-//   const Diagnose = diagnoses.find((Diagnose) => Diagnose.code === code);
-//   return Diagnose ? Diagnose.name : null;
-// };
-
 interface Props {
   patients: Patient[];
   setPatients: React.Dispatch<React.SetStateAction<Patient[]>>;
@@ -116,6 +109,8 @@ const PatientDetailsPage = ({
   const [modalOpen, setModalOpen] = useState<boolean>(false);
   const [error, setError] = useState<string>();
 
+  console.log(diagnoses);
+
   const openModal = (): void => setModalOpen(true);
 
   const closeModal = (): void => {
@@ -124,20 +119,6 @@ const PatientDetailsPage = ({
   };
 
   const submitNewEntry = async (values: EntryWithoutId) => {
-    // try {
-    //   if (patient) {
-    //     const entry = await patientService.addEntry(patient.id, values);
-
-    //     patient = {
-    //       ...patient,
-    //       entries: patient.entries.concat(entry),
-    //     };
-
-    //     // setModalOpen(false);
-    //     // setError('');
-    //     closeModal();
-    //   }
-
     try {
       if (patient) {
         const newEntry = await patientService.addEntry(patient.id, values);
@@ -177,28 +158,6 @@ const PatientDetailsPage = ({
     }
   };
 
-  // const id = useParams().id;
-
-  // useEffect(() => {
-  //   const fetchPatient = async () => {
-  //     if (id) {
-  //       const patient = await patientService.getById(id);
-  //       setPatient(patient);
-  //       console.log(patient);
-  //     } else {
-  //       console.error('Patient not found');
-  //     }
-  //   };
-
-  //   const fetchDiagnoses = async () => {
-  //     const diagnoses = await diagnosesService.getAllDiagnoses();
-  //     setDiagnoses(diagnoses);
-  //   };
-
-  //   void fetchPatient();
-  //   void fetchDiagnoses();
-  // }, [id]);
-
   return (
     <div>
       <Typography component="h5" variant="h5">
@@ -213,6 +172,7 @@ const PatientDetailsPage = ({
         error={error}
         onClose={closeModal}
         modalOpen={modalOpen}
+        diagnoses={diagnoses}
       />
       <Button variant="contained" onClick={() => openModal()}>
         Add New Entry
