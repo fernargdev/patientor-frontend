@@ -1,4 +1,5 @@
 import { useState, SyntheticEvent } from 'react';
+
 import {
   TextField,
   Grid,
@@ -9,6 +10,7 @@ import {
   InputLabel,
   OutlinedInput,
 } from '@mui/material';
+
 import { Diagnose, EntryWithoutId, HealthCheckRating } from '../../types';
 
 interface Props {
@@ -35,33 +37,26 @@ const AddEntryForm = ({ onCancel, onSubmit, diagnoses }: Props) => {
   const [description, setDescription] = useState('');
   const [date, setDate] = useState('');
   const [specialist, setSpecialist] = useState('');
-
   const [diagnosisCodes, setdiagnosisCodes] = useState<Array<Diagnose['code']>>(
     []
   );
 
+  const [entryOptions, setEntryOptions] = useState('HealthCheck');
   const [healthCheckRating, setHealthCheckRating] = useState(
     HealthCheckRating.Healthy
   );
-
   const [dischargeDate, setDischargeDate] = useState('');
   const [dischargeCriteria, setDischargeCriteria] = useState('');
-
   const [employerName, setEmployerName] = useState('');
   const [sickLeaveStart, setSickLeaveStart] = useState('');
   const [sickLeaveEnd, setSickLeaveEnd] = useState('');
-
-  // const [entryOptions, setEntryOptions] = useState();
-  const [entryOptions, setEntryOptions] = useState('HealthCheck');
 
   const onHealthCheckRatingChange = (event: SelectChangeEvent<string>) => {
     event.preventDefault();
 
     const value = Number(event.target.value);
-    // console.log(value);
 
     const healthCheckRating = Object.values(HealthCheckRating);
-    // console.log(healthCheckRating);
 
     if (value && healthCheckRating.includes(value)) {
       setHealthCheckRating(value);
@@ -81,7 +76,23 @@ const AddEntryForm = ({ onCancel, onSubmit, diagnoses }: Props) => {
       : setdiagnosisCodes(value);
   };
 
-  // const addEntry = () => {
+  // const addEntry = (event: SyntheticEvent) => {
+  //   event.preventDefault();
+
+  //   const baseEntry = {
+  //     description,
+  //     date,
+  //     specialist,
+  //     diagnosisCodes,
+  //   };
+
+  //   onSubmit({
+  //     type: 'HealthCheck',
+  //     ...baseEntry,
+  //     healthCheckRating,
+  //   });
+  // };
+
   const addEntry = (event: SyntheticEvent) => {
     event.preventDefault();
 
@@ -92,11 +103,46 @@ const AddEntryForm = ({ onCancel, onSubmit, diagnoses }: Props) => {
       diagnosisCodes,
     };
 
-    onSubmit({
-      type: 'HealthCheck',
-      ...baseEntry,
-      healthCheckRating,
-    });
+    switch (entryOptions) {
+      case 'HealthCheck':
+        console.log({
+          type: 'HealthCheck',
+          ...baseEntry,
+          healthCheckRating,
+        });
+        onSubmit({
+          type: 'HealthCheck',
+          ...baseEntry,
+          healthCheckRating,
+        });
+        break;
+
+      case 'Hospital':
+        onSubmit({
+          type: 'Hospital',
+          ...baseEntry,
+          discharge: {
+            date: dischargeDate,
+            criteria: dischargeCriteria,
+          },
+        });
+        break;
+
+      case 'OccupationalHealthcare':
+        onSubmit({
+          type: 'OccupationalHealthcare',
+          ...baseEntry,
+          employerName,
+          sickLeave:
+            sickLeaveStart && sickLeaveEnd
+              ? {
+                  startDate: sickLeaveStart,
+                  endDate: sickLeaveEnd,
+                }
+              : undefined,
+        });
+        break;
+    }
   };
 
   return (
@@ -130,7 +176,6 @@ const AddEntryForm = ({ onCancel, onSubmit, diagnoses }: Props) => {
 
         <InputLabel style={{ padding: 10 }}>Date:</InputLabel>
         <TextField
-          // label="Date"
           type="date"
           fullWidth
           value={date}

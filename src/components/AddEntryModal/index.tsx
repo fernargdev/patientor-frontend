@@ -17,7 +17,6 @@ interface Props {
   diagnoses: Diagnose[];
 }
 
-// AddPatientModal
 const AddEntryModal = ({
   modalOpen,
   onClose,

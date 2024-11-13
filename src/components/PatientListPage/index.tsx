@@ -10,15 +10,15 @@ import {
   TableRow,
   TableBody,
 } from '@mui/material';
+
 import axios from 'axios';
 
 import { PatientFormValues, Patient } from '../../types';
 
-import AddPatientModal from '../AddPatientModal';
-
-import HealthRatingBar from '../HealthRatingBar';
-
 import patientService from '../../services/patients';
+
+import AddPatientModal from '../AddPatientModal';
+import HealthRatingBar from '../HealthRatingBar';
 
 interface Props {
   patients: Patient[];
@@ -37,19 +37,11 @@ const PatientListPage = ({ patients, setPatients }: Props) => {
   };
 
   const submitNewPatient = async (values: PatientFormValues) => {
-    // console.log('1');
-
     try {
-      // console.log('2');
-
-      // console.log(values);
-
-      const patient = await patientService.create(values);
-      // console.log('3');
-      console.log(patient);
+      const patient = await patientService.addPatient(values);
+      // console.log(patient);
 
       setPatients(patients.concat(patient));
-      // setModalOpen(false);
 
       closeModal();
     } catch (e: unknown) {
@@ -59,6 +51,7 @@ const PatientListPage = ({ patients, setPatients }: Props) => {
             'Something went wrong. Error: ',
             ''
           );
+
           console.error(message);
           setError(message);
         } else {
@@ -73,12 +66,13 @@ const PatientListPage = ({ patients, setPatients }: Props) => {
   };
 
   return (
-    <div className="App">
+    <div>
       <Box>
         <Typography align="center" variant="h6">
           Patient list
         </Typography>
       </Box>
+
       <Table style={{ marginBottom: '1em' }}>
         <TableHead>
           <TableRow>
@@ -88,6 +82,7 @@ const PatientListPage = ({ patients, setPatients }: Props) => {
             <TableCell>Health Rating</TableCell>
           </TableRow>
         </TableHead>
+
         <TableBody>
           {Object.values(patients).map((patient: Patient) => (
             <TableRow key={patient.id}>
@@ -103,12 +98,14 @@ const PatientListPage = ({ patients, setPatients }: Props) => {
           ))}
         </TableBody>
       </Table>
+
       <AddPatientModal
         modalOpen={modalOpen}
         onSubmit={submitNewPatient}
         error={error}
         onClose={closeModal}
       />
+
       <Button variant="contained" onClick={() => openModal()}>
         Add New Patient
       </Button>
