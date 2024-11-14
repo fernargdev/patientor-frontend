@@ -38,7 +38,7 @@ const App = () => {
 
   return (
     <div className="App">
-      <Container>
+      <Container style={{ paddingBottom: 20 }}>
         <Typography variant="h3" style={{ marginBottom: '0.5em' }}>
           Patientor
         </Typography>

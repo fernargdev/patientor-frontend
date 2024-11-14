@@ -1,10 +1,12 @@
 import { useState } from 'react';
+import axios from 'axios';
 
 import { Box, Button, Typography } from '@mui/material';
 import FemaleIcon from '@mui/icons-material/Female';
 import MaleIcon from '@mui/icons-material/Male';
 import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
 import WorkIcon from '@mui/icons-material/Work';
+import HospitalIcon from '@mui/icons-material/LocalHospital';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 
 import {
@@ -17,8 +19,15 @@ import {
 } from '../../types';
 
 import patientService from '../../services/patients';
-import axios from 'axios';
-import AddEntryModal from '../AddEntry';
+
+import AddEntryModal from '../AddEntryModal';
+
+interface Props {
+  patients: Patient[];
+  setPatients: React.Dispatch<React.SetStateAction<Patient[]>>;
+  patient: Patient | null | undefined;
+  diagnoses: Diagnose[];
+}
 
 const genderIcon = (gender: Gender | undefined) => {
   if (gender === 'female') {
@@ -33,16 +42,64 @@ const genderIcon = (gender: Gender | undefined) => {
 const HealthIcon = (health: HealthCheckRating) => {
   switch (health) {
     case 0:
-      return <FavoriteIcon sx={{ color: 'green' }} />;
+      return (
+        <p
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 3,
+            color: 'green',
+          }}
+        >
+          Healthy
+          <FavoriteIcon sx={{ color: 'green' }} />
+        </p>
+      );
 
     case 1:
-      return <FavoriteIcon sx={{ color: 'yellow' }} />;
+      return (
+        <p
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 3,
+            color: 'yellow',
+          }}
+        >
+          LowRisk
+          <FavoriteIcon sx={{ color: 'yellow' }} />
+        </p>
+      );
 
     case 2:
-      return <FavoriteIcon sx={{ color: 'orange' }} />;
+      return (
+        <p
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 3,
+            color: 'orange',
+          }}
+        >
+          HighRisk
+          <FavoriteIcon sx={{ color: 'orange' }} />
+        </p>
+      );
 
     case 3:
-      return <FavoriteIcon sx={{ color: 'red' }} />;
+      return (
+        <p
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            color: 'red',
+          }}
+        >
+          CriticalRisk
+          <FavoriteIcon sx={{ color: 'red' }} />
+        </p>
+      );
   }
 };
 
@@ -54,34 +111,58 @@ const assertNever = (value: never): never => {
 
 const EntryDetails = ({ entry }: { entry: Entry }) => {
   switch (entry.type) {
-    case 'OccupationalHealthcare':
-      return (
-        <div>
-          <p>
-            {entry.date} <WorkIcon /> {entry.employerName}
-          </p>
-          <p>{entry.description}</p>
-        </div>
-      );
-
     case 'HealthCheck':
       return (
         <div>
-          <p>
-            {entry.date} <MedicalServicesIcon />
+          <p style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            {entry.date}
+            <span>
+              <MedicalServicesIcon />
+            </span>
           </p>
           <p>{entry.description}</p>
           {HealthIcon(entry.healthCheckRating)}
         </div>
       );
 
+    case 'OccupationalHealthcare':
+      return (
+        <div>
+          <p style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            {entry.date}
+            <span>
+              <WorkIcon />
+            </span>
+            {entry.employerName}
+          </p>
+          <p>{entry.description}</p>
+
+          {entry.sickLeave ? (
+            <p>
+              SICK LEAVE: <br />
+              From {entry.sickLeave.startDate} to {entry.sickLeave.endDate}
+            </p>
+          ) : null}
+        </div>
+      );
+
     case 'Hospital':
       return (
         <div>
-          <p>
-            {entry.date} <MedicalServicesIcon />
+          <p style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            {entry.date}
+            <span>
+              <HospitalIcon />
+            </span>
           </p>
           <p>{entry.description}</p>
+
+          <p>
+            Discharge :
+            <br />- Date: {entry.discharge.date}
+            <br />- Criteria: {entry.discharge.criteria}
+            <br />
+          </p>
         </div>
       );
 
@@ -89,13 +170,6 @@ const EntryDetails = ({ entry }: { entry: Entry }) => {
       return assertNever(entry);
   }
 };
-
-interface Props {
-  patients: Patient[];
-  setPatients: React.Dispatch<React.SetStateAction<Patient[]>>;
-  patient: Patient | null | undefined;
-  diagnoses: Diagnose[];
-}
 
 const PatientDetailsPage = ({
   patients,
@@ -106,7 +180,7 @@ const PatientDetailsPage = ({
   const [modalOpen, setModalOpen] = useState<boolean>(false);
   const [error, setError] = useState<string>();
 
-  console.log(diagnoses);
+  // console.log(diagnoses);
 
   const openModal = (): void => setModalOpen(true);
 
@@ -119,6 +193,8 @@ const PatientDetailsPage = ({
     try {
       if (patient) {
         const newEntry = await patientService.addEntry(patient.id, values);
+
+        console.log(newEntry);
 
         const newPatient = {
           ...patient,
@@ -157,78 +233,72 @@ const PatientDetailsPage = ({
 
   return (
     <div>
-      <Typography component="h5" variant="h5">
-        {patient?.name} {genderIcon(patient?.gender)}
-      </Typography>
+      <div style={{ marginTop: 20, marginBottom: 20 }}>
+        <Typography component="h5" variant="h5">
+          {patient?.name} {genderIcon(patient?.gender)}
+        </Typography>
 
-      <p>ssn: {patient?.ssn}</p>
-      <p>occupation: {patient?.occupation}</p>
+        <p>SSN: {patient?.ssn}</p>
+        <p>Occupation: {patient?.occupation}</p>
+      </div>
 
-      <AddEntryModal
-        onSubmit={submitNewEntry}
-        error={error}
-        onClose={closeModal}
-        modalOpen={modalOpen}
-        diagnoses={diagnoses}
-      />
-      <Button variant="contained" onClick={() => openModal()}>
-        Add New Entry
-      </Button>
+      <div style={{ marginTop: 20, marginBottom: 20 }}>
+        <Button variant="contained" onClick={() => openModal()}>
+          Add New Entry
+        </Button>
+        <AddEntryModal
+          onSubmit={submitNewEntry}
+          error={error}
+          onClose={closeModal}
+          modalOpen={modalOpen}
+          diagnoses={diagnoses}
+        />
+      </div>
 
-      <Typography component="h6" variant="h6">
-        Entries
-      </Typography>
+      <div>
+        <Typography component="h6" variant="h6">
+          Entries :
+        </Typography>
 
-      {patient?.entries.map((e) => {
-        return (
-          <div key={e.id}>
-            <Box
-              sx={{
-                border: '1px solid grey',
-                borderRadius: 4,
-                padding: 2,
-                margin: 1,
-              }}
-            >
-              <p>{e.date}</p>
+        {patient?.entries.map((e) => {
+          return (
+            <div key={e.id}>
+              <Box
+                sx={{
+                  border: '1px solid grey',
+                  borderRadius: 4,
+                  paddingLeft: 2,
+                  marginTop: 1,
+                }}
+              >
+                <EntryDetails entry={e} />
 
-              {e.type === 'OccupationalHealthcare' ? (
-                e.employerName ? (
-                  <p>
-                    <WorkIcon /> {e.employerName}
-                  </p>
-                ) : (
-                  <WorkIcon />
-                )
-              ) : (
-                <MedicalServicesIcon />
-              )}
+                {e.diagnosisCodes && e.diagnosisCodes.length > 0 ? (
+                  <div>
+                    <span>Diagnoses :</span>
 
-              <p>
-                <i>{e.description}</i>
-              </p>
+                    <ul style={{ marginTop: 0 }}>
+                      {e.diagnosisCodes?.map((d) => {
+                        const Diagnose = diagnoses.find(
+                          (diagnose) => diagnose.code === d
+                        )?.name;
 
-              <ul>
-                {e.diagnosisCodes?.map((d) => {
-                  const Diagnose = diagnoses.find(
-                    (diagnose) => diagnose.code === d
-                  )?.name;
+                        return (
+                          <li key={d}>
+                            {d} : {Diagnose ? Diagnose : null}
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                ) : null}
 
-                  return (
-                    <li key={d}>
-                      {d} {Diagnose ? Diagnose : null}
-                    </li>
-                  );
-                })}
-              </ul>
-
-              <EntryDetails entry={e} />
-
-              <p>diagnose by {e.specialist}</p>
-            </Box>
-          </div>
-        );
-      })}
+                <p>diagnose by {e.specialist}.</p>
+              </Box>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 };
