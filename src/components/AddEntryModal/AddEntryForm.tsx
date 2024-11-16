@@ -228,7 +228,13 @@ const AddEntryForm = ({ onCancel, onSubmit, diagnoses }: Props) => {
 
         {entryOptions === 'Hospital' && (
           <>
-            <InputLabel style={{ padding: 10 }}>Discharge Date :</InputLabel>
+            <InputLabel style={{ marginTop: 20, padding: 10 }}>
+              Discharge :
+            </InputLabel>
+
+            <InputLabel style={{ padding: 10, paddingTop: 5 }}>
+              Date :
+            </InputLabel>
             <TextField
               // label="Discharge Date"
               type="date"
@@ -237,8 +243,8 @@ const AddEntryForm = ({ onCancel, onSubmit, diagnoses }: Props) => {
               onChange={({ target }) => setDischargeDate(target.value)}
             />
 
-            <InputLabel style={{ padding: 10 }}>
-              Discharge Criteria :
+            <InputLabel style={{ padding: 10, paddingTop: 5 }}>
+              Criteria :
             </InputLabel>
             <TextField
               label="Discharge Criteria"
@@ -259,7 +265,13 @@ const AddEntryForm = ({ onCancel, onSubmit, diagnoses }: Props) => {
               onChange={({ target }) => setEmployerName(target.value)}
             />
 
-            <InputLabel style={{ padding: 10 }}>Sick Leave :</InputLabel>
+            <InputLabel style={{ marginTop: 20, padding: 10 }}>
+              Sick Leave :
+            </InputLabel>
+
+            <InputLabel style={{ padding: 10, paddingTop: 5 }}>
+              Start Date:
+            </InputLabel>
             <TextField
               type="date"
               fullWidth
@@ -267,7 +279,9 @@ const AddEntryForm = ({ onCancel, onSubmit, diagnoses }: Props) => {
               onChange={({ target }) => setSickLeaveStart(target.value)}
             />
 
-            <InputLabel style={{ padding: 10 }}>Sick Leave :</InputLabel>
+            <InputLabel style={{ padding: 10, paddingTop: 5 }}>
+              End Date:
+            </InputLabel>
             <TextField
               type="date"
               fullWidth
